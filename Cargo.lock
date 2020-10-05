@@ -113,6 +113,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1cc81bdf5a1a38b5530570cd6a636003e8b4bab6a1a9b8153f645b03293a14f8"
 
 [[package]]
+name = "codicon"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12170080f3533d6f09a19f81596f836854d0fa4867dc32c8172b8474b4e9de61"
+
+[[package]]
 name = "colorful"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -871,7 +877,7 @@ source = "git+https://github.com/enarx/sev#56aa3b0b67c50057b3e67bc7a36ca095db26f
 dependencies = [
  "bitfield",
  "bitflags",
- "codicon",
+ "codicon 2.1.0",
  "iocuddle",
  "openssl",
 ]
@@ -881,7 +887,7 @@ name = "sevctl"
 version = "0.1.0"
 dependencies = [
  "clap",
- "codicon",
+ "codicon 3.0.0",
  "colorful",
  "errno",
  "reqwest",
