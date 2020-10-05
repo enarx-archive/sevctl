@@ -22,7 +22,7 @@ is-it-maintained-open-issues = { repository = "enarx/sevctl" }
 
 [dependencies]
 sev = { git = "https://github.com/enarx/sev", features = ["openssl"] }
-tiny_http = "0.6.2"
+tiny_http = "0.7.0"
 reqwest = { version = "0.10", features= ["blocking"] }
 codicon = "2.1.0"
 colorful = "0.2.1"
