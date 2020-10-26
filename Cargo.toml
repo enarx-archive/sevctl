@@ -25,5 +25,5 @@ sev = { git = "https://github.com/enarx/sev", features = ["openssl"] }
 reqwest = { version = "0.10", features= ["blocking"] }
 codicon = "3.0"
 colorful = "0.2.1"
-errno = "0.2.4"
+errno = "0.2.7"
 clap = "2.33.0"
