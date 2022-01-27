@@ -22,6 +22,16 @@ pub enum SevGeneration {
     Snp,
 }
 
+impl SevGeneration {
+    fn to_mask(&self) -> usize {
+        match self {
+            SevGeneration::Sev => SEV_MASK,
+            SevGeneration::Es => SEV_MASK | ES_MASK,
+            SevGeneration::Snp => SEV_MASK | ES_MASK | SNP_MASK,
+        }
+    }
+}
+
 type TestFn = dyn Fn() -> TestResult;
 
 // SEV generation-specific bitmasks.
@@ -357,12 +367,8 @@ pub fn cmd(gen: Option<SevGeneration>, quiet: bool) -> Result<()> {
     let tests = collect_tests();
 
     let mask = match gen {
-        Some(g) => match g {
-            SevGeneration::Sev => SEV_MASK,
-            SevGeneration::Es => SEV_MASK | ES_MASK,
-            SevGeneration::Snp => SEV_MASK | ES_MASK | SNP_MASK,
-        },
-        None => SEV_MASK | ES_MASK | SNP_MASK,
+        Some(g) => g.to_mask(),
+        None => current_gen().unwrap_or(SevGeneration::Snp).to_mask(),
     };
 
     if run_test(&tests, 0, quiet, mask) {
@@ -579,5 +585,38 @@ fn memlock_rlimit() -> TestResult {
         name: "Memlock resource limit",
         stat,
         mesg: Some(mesg),
+    }
+}
+
+fn current_gen() -> Result<SevGeneration> {
+    let mut bytestr = Vec::with_capacity(48);
+    let cpu_name = {
+        for cpuid in 0x8000_0002_u32..=0x8000_0004_u32 {
+            let cpuid = unsafe { x86_64::__cpuid(cpuid) };
+            let mut bytes: Vec<u8> = [cpuid.eax, cpuid.ebx, cpuid.ecx, cpuid.edx]
+                .iter()
+                .flat_map(|r| r.to_le_bytes().to_vec())
+                .collect();
+            bytestr.append(&mut bytes);
+        }
+
+        String::from_utf8(bytestr)
+            .unwrap_or_else(|_| "ERROR_FOUND".to_string())
+            .trim()
+            .to_string()
+    };
+
+    let name = cpu_name.to_uppercase();
+    if name.contains("7551") || name.contains("7451") || name.contains("7401") {
+        Ok(SevGeneration::Sev)
+    } else if name.contains("7402") || name.contains("7742") {
+        Ok(SevGeneration::Es)
+    } else if name.contains("7713") || name.contains("7763") || name.contains("7413") {
+        Ok(SevGeneration::Snp)
+    } else {
+        Err(error::Context::new(
+            "unable to find AMD processor generation",
+            Box::<Error>::new(ErrorKind::InvalidData.into()),
+        ))
     }
 }
